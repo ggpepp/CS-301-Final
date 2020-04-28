@@ -11,9 +11,9 @@ int main(int argc, char const *argv[])
     fstream T1;
     fstream T2;
     fstream T3;
-    T1.open("Tables/T1.txt", ios::in);
-    T2.open("Tables/T2.txt", ios::in);
-    T3.open("Tables/T3.txt", ios::in);
+    T1.open(argv[1], ios::in);
+    T2.open(argv[2], ios::in);
+    T3.open(argv[3], ios::in);
     string dump;
     if(T1.is_open() && T2.is_open() && T3.is_open())
     {
@@ -83,7 +83,16 @@ int main(int argc, char const *argv[])
         {
             db.tablesselected[i] = 0;
         }
-        
+        for (int i = 0; i < 10; i++)
+        {
+            db.valCompares[i] = -1;
+            for (int j = 0; j < 10; j++)
+            {
+                db.columnCompares[i][j] = 0;
+            }
+            
+        }
+
         int allcolumns = 0;
         if(query[i] == '*') //SELECT ALL COLUMNS
         {
@@ -148,7 +157,6 @@ int main(int argc, char const *argv[])
                 }
             }
         }
-        int tablesselected[3] = {0};
         while ((query[i] != 'W')&&(i < query.size()))//Selecting tables
         {
             if(query[i] == 'T')//Start of new table select
@@ -180,20 +188,17 @@ int main(int argc, char const *argv[])
         {
             i+=6;
         }
-        
         string expression;
         while(i < query.size())//create where expressions
         {
             if(query[i] == ';') 
             {
                 if(!expression.empty()) db.convert(expression);
-                cout << expression << endl;
                 break;
             }
             else if((query[i] == ' ')&& !(expression.empty()))
             {
                 db.convert(expression);
-                cout << expression << endl;
                 expression.clear();
                 i++;
             }
@@ -208,7 +213,8 @@ int main(int argc, char const *argv[])
             }
             
         }
-        db.join(allcolumns, clearance);
+        if(db.valCompares[9] <= clearance) db.join(allcolumns, clearance);
+        else cout << "Error: Security Level Violation" << endl;
         
         clearance = 0;
         cout << "Enter your classification" << endl;
