@@ -14,3 +14,12 @@ void print(int value)
     else if(value < 1000000000) cout << " " << value << " ";
     else cout << value << " ";
 }
+
+void printDividers(int num)
+{
+    for (int i = 0; i < num; i++)
+    {
+        cout <<"---------- ";
+    }
+    cout << endl;
+}

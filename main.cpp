@@ -1,10 +1,13 @@
 #include<iostream>
 #include<fstream>
 #include<string>
-#include"printer.cpp"
+#include"DB.cpp"
+
 using namespace std;
 int main(int argc, char const *argv[])
 {
+    DB db;
+
     fstream T1;
     fstream T2;
     fstream T3;
@@ -27,53 +30,38 @@ int main(int argc, char const *argv[])
         T3.close();
         return 0;
     }
-    int A1[500];
-    int T1_KC[500];
-    int A2[500];
-    int T1_TC[500];
-
-    int B1[500];
-    int T2_KC[500];
-    int B2[500];
-    int B3[500];
-    int T2_TC[500];
-
-    int C1[500];
-    int T3_KC[500];
-    int C2[500];
-    int C3[500];
-    int C4[500];
-    int T3_TC[500];
 
     int T1size = 0;
-    while (T1 >> A1[T1size])
+    while (T1 >> db.A1[T1size])
     {
-        T1 >> T1_KC[T1size];
-        T1 >> A2[T1size];
-        T1 >> T1_TC[T1size];
+        T1 >> db.T1_KC[T1size];
+        T1 >> db.A2[T1size];
+        T1 >> db.T1_TC[T1size];
         T1size++;
     }
-
+    db.T1size = T1size;
     int T2size = 0;
-    while (T2 >> B1[T2size])
+    while (T2 >> db.B1[T2size])
     {
-        T2 >> T2_KC[T2size];
-        T2 >> B2[T2size];
-        T2 >> B3[T2size];
-        T2 >> T2_TC[T2size];
+        T2 >> db.T2_KC[T2size];
+        T2 >> db.B2[T2size];
+        T2 >> db.B3[T2size];
+        T2 >> db.T2_TC[T2size];
         T2size++;
     }
+    db.T2size = T2size;
     
     int T3size = 0;
-    while (T3 >> C1[T3size])
+    while (T3 >> db.C1[T3size])
     {
-        T3 >> T3_KC[T3size];
-        T3 >> C2[T3size];
-        T3 >> C3[T3size];
-        T3 >> C4[T3size];
-        T3 >> T3_TC[T3size];
+        T3 >> db.T3_KC[T3size];
+        T3 >> db.C2[T3size];
+        T3 >> db.C3[T3size];
+        T3 >> db.C4[T3size];
+        T3 >> db.T3_TC[T3size];
         T3size++;
     }
+    db.T3size = T3size;
 
     T1.close();
     T2.close();
@@ -83,14 +71,145 @@ int main(int argc, char const *argv[])
     string query = "1";
     while(cin >> clearance)
     {
+        int i = 7;
         cout << "Enter you Query" << endl;
         cin.ignore();
-        getline(cin,  query); 
-        cout << query << endl;
-        print(100);
-        cout << endl;
-
-
+        getline(cin, query);
+        for (int i = 0; i < 9; i++)
+        {
+            db.selectedColumns[i] = 0;
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            db.tablesselected[i] = 0;
+        }
+        
+        int allcolumns = 0;
+        if(query[i] == '*') //SELECT ALL COLUMNS
+        {
+            allcolumns = 1;
+            i = 14;
+        }
+        else //SELECT CERTAIN COLUMNS
+        {
+            while (query[i] != 'T')//Finding which columns that are requested
+            {
+                if(query[i] == 'A')//For the A columns
+                {
+                    i++;
+                    if(query[i] == '1')
+                    {
+                        db.selectedColumns[0] = 1;
+                    }
+                    else if(query[i] == '2')
+                    {
+                        db.selectedColumns[1] = 1;
+                    }
+                }
+                else if(query[i] == 'B')//For the B columns
+                {
+                    i++;
+                    if(query[i] == '1')
+                    {
+                        db.selectedColumns[2] = 1;
+                    }
+                    else if(query[i] == '2')
+                    {
+                        db.selectedColumns[3] = 1;
+                    }
+                    else if(query[i] == '3')
+                    {
+                        db.selectedColumns[4] = 1;
+                    }
+                }
+                else if(query[i] == 'C')//For the C columns
+                {
+                    i++;
+                    if(query[i] == '1')
+                    {
+                        db.selectedColumns[5] = 1;
+                    }
+                    else if(query[i] == '2')
+                    {
+                        db.selectedColumns[6] = 1;
+                    }
+                    else if(query[i] == '3')
+                    {
+                        db.selectedColumns[7] = 1;
+                    }
+                    else if(query[i] == '4')
+                    {
+                        db.selectedColumns[8] = 1;
+                    }
+                }
+                else //for the , and the space in the select statement
+                {
+                    i++;
+                }
+            }
+        }
+        int tablesselected[3] = {0};
+        while ((query[i] != 'W')&&(i < query.size()))//Selecting tables
+        {
+            if(query[i] == 'T')//Start of new table select
+            {
+                i++;
+                if(query[i] == '1')//Table 1
+                {
+                    db.tablesselected[0] = 1;
+                    i++;
+                }
+                else if(query[i] == '2')//Table 2
+                {
+                    db.tablesselected[1] = 1;
+                    i++;
+                }
+                else if(query[i] == '3')//Table 3
+                {
+                    db.tablesselected[2] = 1;
+                    i++;
+                }
+            }
+            else //Commas and Spaces
+            {
+                i++;
+            }
+            
+        }
+        if (query[i] == 'W')
+        {
+            i+=6;
+        }
+        
+        string expression;
+        while(i < query.size())//create where expressions
+        {
+            if(query[i] == ';') 
+            {
+                if(!expression.empty()) db.convert(expression);
+                cout << expression << endl;
+                break;
+            }
+            else if((query[i] == ' ')&& !(expression.empty()))
+            {
+                db.convert(expression);
+                cout << expression << endl;
+                expression.clear();
+                i++;
+            }
+            else if(query[i] == 'a')
+            {
+                i = i + 4;
+            }
+            else
+            {
+                expression += query[i];
+                i++;
+            }
+            
+        }
+        db.join(allcolumns, clearance);
+        
         clearance = 0;
         cout << "Enter your classification" << endl;
 
